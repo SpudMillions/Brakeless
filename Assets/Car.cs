@@ -16,26 +16,30 @@ public class Car : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		ProcessInput();
+		Boost();
+		Turn();
 	}
 
-	private void ProcessInput()
+	private void Boost()
 	{
-		if(Input.GetKey(KeyCode.Space))
+		if (Input.GetKey(KeyCode.Space))
 		{
 			rigidBody.AddRelativeForce(Vector3.up);
-			if(!audioSource.isPlaying)
+			if (!audioSource.isPlaying)
 			{
 				audioSource.Play();
 			}
-			
-		}
-        else
-        {
-            audioSource.Stop();
-        }
 
-		if(Input.GetKey(KeyCode.A))
+		}
+		else
+		{
+			audioSource.Stop();
+		}
+	}
+	private void Turn()
+	{
+        rigidBody.freezeRotation = true; // take manual control of rotation
+		if (Input.GetKey(KeyCode.A))
 		{
 			transform.Rotate(Vector3.forward);
 		}
@@ -43,5 +47,9 @@ public class Car : MonoBehaviour {
 		{
 			transform.Rotate(Vector3.back);
 		}
+
+        rigidBody.freezeRotation = false; // release manual control
 	}
+
+	
 }
