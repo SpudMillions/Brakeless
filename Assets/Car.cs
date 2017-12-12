@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Car : MonoBehaviour {
 
@@ -15,6 +16,9 @@ public class Car : MonoBehaviour {
 	Rigidbody rigidBody;
 	AudioSource audioSource;
 
+	enum State { Alive, Dying, Transcending };
+	State state = State.Alive;
+
 	// Use this for initialization
 	private void Start () {
 		rigidBody = GetComponent<Rigidbody>();
@@ -23,8 +27,11 @@ public class Car : MonoBehaviour {
 	
 	// Update is called once per frame
 	private void Update () {
-		Accelerate();
-		Turn();
+		if(state == State.Alive)
+		{
+			Accelerate();
+			Turn();
+		}
 	}
 
 	private void Accelerate()
@@ -64,6 +71,9 @@ public class Car : MonoBehaviour {
 
 	private void OnCollisionEnter(Collision collision)
 	{
+		//we only want to check while we are alive
+		if (state != State.Alive) { return; }
+
 		switch (collision.gameObject.tag)
 		{
 			case "Friendly":
@@ -72,11 +82,25 @@ public class Car : MonoBehaviour {
 			case "Fuel":
 				//add fuel
 				break;
+			case "Finish":
+				state = State.Transcending;
+				Invoke("LoadNextLevel", 1f);
+				break;
 			default:
 				//dead
-				//todo: kill player
+				state = State.Dying;
+				Invoke("LoadFirstLevel", 1f);
 				break;
 		}
 	}
 
+	private void LoadFirstLevel()
+	{
+		SceneManager.LoadScene(0);
+	}
+
+	private void LoadNextLevel()
+	{
+		SceneManager.LoadScene(1);
+	}
 }
