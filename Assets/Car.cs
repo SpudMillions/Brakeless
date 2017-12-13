@@ -13,7 +13,18 @@ public class Car : MonoBehaviour {
 	[SerializeField]
 	private float accelerationSpeed = 40f;
 
+	[SerializeField] AudioClip mainEngine;
+	[SerializeField] AudioClip winLevel;
+	[SerializeField] AudioClip carCrash;
+
+	[SerializeField] ParticleSystem mainEngineParticle;
+	[SerializeField] ParticleSystem winLevelParticle;
+	[SerializeField] ParticleSystem carCrashParticle;
+
+
+
 	Rigidbody rigidBody;
+
 	AudioSource audioSource;
 
 	enum State { Alive, Dying, Transcending };
@@ -38,18 +49,26 @@ public class Car : MonoBehaviour {
 	{
 		if (Input.GetKey(KeyCode.Space))
 		{
-			rigidBody.AddRelativeForce(Vector3.up * accelerationSpeed);
-			if (!audioSource.isPlaying)
-			{
-				audioSource.Play();
-			}
+			ApplyAcceleration();
 
 		}
 		else
 		{
 			audioSource.Stop();
+			mainEngineParticle.Stop();
 		}
 	}
+
+	private void ApplyAcceleration()
+	{
+		rigidBody.AddRelativeForce(Vector3.up * accelerationSpeed);
+		if (!audioSource.isPlaying)
+		{
+			audioSource.PlayOneShot(mainEngine);
+		}
+		mainEngineParticle.Play();
+	}
+
 	private void Turn()
 	{
 		rigidBody.freezeRotation = true; // take manual control of rotation
@@ -83,15 +102,29 @@ public class Car : MonoBehaviour {
 				//add fuel
 				break;
 			case "Finish":
-				state = State.Transcending;
-				Invoke("LoadNextLevel", 1f);
+				StartWinSequence();
 				break;
 			default:
 				//dead
-				state = State.Dying;
-				Invoke("LoadFirstLevel", 1f);
+				StartLoseSequence();
 				break;
 		}
+	}
+
+	private void StartLoseSequence()
+	{
+		state = State.Dying;
+		audioSource.Stop();
+		audioSource.PlayOneShot(carCrash);
+		Invoke("LoadFirstLevel", 1f);
+	}
+
+	private void StartWinSequence()
+	{
+		state = State.Transcending;
+		audioSource.Stop();
+		audioSource.PlayOneShot(winLevel);
+		Invoke("LoadNextLevel", 1f);
 	}
 
 	private void LoadFirstLevel()
