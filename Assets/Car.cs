@@ -13,6 +13,8 @@ public class Car : MonoBehaviour {
 	[SerializeField]
 	private float accelerationSpeed = 40f;
 
+	[SerializeField] float levelLoadDelay = 2f;
+
 	[SerializeField] AudioClip mainEngine;
 	[SerializeField] AudioClip winLevel;
 	[SerializeField] AudioClip carCrash;
@@ -61,7 +63,7 @@ public class Car : MonoBehaviour {
 
 	private void ApplyAcceleration()
 	{
-		rigidBody.AddRelativeForce(Vector3.up * accelerationSpeed);
+		rigidBody.AddRelativeForce(Vector3.up * accelerationSpeed * Time.deltaTime);
 		if (!audioSource.isPlaying)
 		{
 			audioSource.PlayOneShot(mainEngine);
@@ -116,7 +118,7 @@ public class Car : MonoBehaviour {
 		state = State.Dying;
 		audioSource.Stop();
 		audioSource.PlayOneShot(carCrash);
-		Invoke("LoadFirstLevel", 1f);
+		Invoke("LoadFirstLevel", levelLoadDelay);
 	}
 
 	private void StartWinSequence()
@@ -124,7 +126,7 @@ public class Car : MonoBehaviour {
 		state = State.Transcending;
 		audioSource.Stop();
 		audioSource.PlayOneShot(winLevel);
-		Invoke("LoadNextLevel", 1f);
+		Invoke("LoadNextLevel", levelLoadDelay);
 	}
 
 	private void LoadFirstLevel()
