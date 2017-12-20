@@ -32,6 +32,8 @@ public class Car : MonoBehaviour {
 	enum State { Alive, Dying, Transcending };
 	State state = State.Alive;
 
+	bool collisionsAreEnabled = true;
+
 	// Use this for initialization
 	private void Start () {
 		rigidBody = GetComponent<Rigidbody>();
@@ -44,6 +46,24 @@ public class Car : MonoBehaviour {
 		{
 			Accelerate();
 			Turn();
+		}
+
+		if(Debug.isDebugBuild)
+		{
+			RespondToDebugKeys();
+		}
+		
+	}
+
+	private void RespondToDebugKeys()
+	{
+		if(Input.GetKeyDown(KeyCode.L))
+		{
+			LoadNextLevel();
+		}
+		else if(Input.GetKeyDown(KeyCode.C))
+		{
+			collisionsAreEnabled = !collisionsAreEnabled;
 		}
 	}
 
@@ -93,7 +113,7 @@ public class Car : MonoBehaviour {
 	private void OnCollisionEnter(Collision collision)
 	{
 		//we only want to check while we are alive
-		if (state != State.Alive) { return; }
+		if (state != State.Alive || !collisionsAreEnabled) { return; }
 
 		switch (collision.gameObject.tag)
 		{
@@ -136,6 +156,16 @@ public class Car : MonoBehaviour {
 
 	private void LoadNextLevel()
 	{
-		SceneManager.LoadScene(1);
+		int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+		int nextSceneIndex = currentSceneIndex + 1;
+
+		if(SceneManager.sceneCountInBuildSettings == nextSceneIndex)
+		{
+			LoadFirstLevel();
+		}
+		else
+		{
+			SceneManager.LoadScene(currentSceneIndex + 1);
+		}
 	}
 }
